@@ -6,7 +6,8 @@ import { useEffect, useRef } from "react"
  * @param value - any arbitrary data we want to persist into the immutable ref 
  * @returns React.MutableRefObject with current value of type T (unknown if not provided)
  */
-const useUpdatingRef = <T extends unknown>(value: T) => {
+// Trailing comma after T to avoid parsing ambiguity (https://github.com/microsoft/TypeScript/issues/15713#issuecomment-499474386)
+const useUpdatingRef = <T,>(value: T) => {
   const ref = useRef<T>()
 
   useEffect(() => {

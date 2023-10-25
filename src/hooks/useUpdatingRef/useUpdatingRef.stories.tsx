@@ -1,15 +1,44 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import useUpdatingRef from '.';
 import { Text } from '@mantine/core';
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
-const UseUpdatingRefDemo = () => {
-  const updatingRef = useUpdatingRef<HTMLElement| null>(null)
-  return <Text size="xl" ref={(ref) => updatingRef.current = ref}>Test</Text>
+interface UseUpdatingRefDemoProps {
+  value: unknown;
+}
+interface MemoizedRefComponentProps {
+  refObj: React.MutableRefObject<string | undefined>;
+}
+
+const RefComponent: React.FC<MemoizedRefComponentProps> = ({ refObj }) => {
+  const refObjCountRef = useRef(1)
+
+  useEffect(() => {
+    refObjCountRef.current++
+  }, [refObj])
+
+  return (
+    <Text>Distinct ref objects:{refObjCountRef.current}</Text>
+  )
+}
+
+const MemoizedRefComponent = React.memo(RefComponent)
+
+const UseUpdatingRefDemo = ({ value }: UseUpdatingRefDemoProps) => {
+  const updatingRef = useUpdatingRef<string>(value as string)
+  return (
+  <>
+    <Text size="xl">props.value === "{value as "string"}"</Text>
+    <Text size="xl">ref.current === "{updatingRef.current}" (ref.current updated in effect, so won't have updated at render time)</Text>
+    <MemoizedRefComponent refObj={updatingRef} />
+  </>
+  )
 }
 
 const meta = {
-  // title: "Hooks/useUpdatingRef",
+  title: "Hooks/useUpdatingRef",
   component: UseUpdatingRefDemo,
+  tags: ['autodocs'],
 } satisfies Meta<typeof UseUpdatingRefDemo>;
 
 export default meta;
@@ -17,7 +46,6 @@ type Story = StoryObj<typeof UseUpdatingRefDemo>;
 
 export const Primary: Story = {
   args: {
-    primary: true,
-    label: 'Button',
+    value: "Initial Value",
   },
 };
