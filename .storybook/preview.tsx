@@ -1,10 +1,13 @@
 import React from "react"
-import type { Preview } from "@storybook/react";
-import { MantineProvider as TheMantineProvider, createTheme } from '@mantine/core';
+import type { Preview } from "@storybook/react"
+import {
+  MantineProvider as TheMantineProvider,
+  createTheme,
+} from "@mantine/core"
 const theme = createTheme({
   /** Put your mantine theme override here */
-});
-import '@mantine/core/styles.css';
+})
+import "@mantine/core/styles.css"
 
 const preview: Preview = {
   parameters: {
@@ -15,8 +18,9 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
+    deepControls: { enabled: true },
   },
-};
+}
 
 export const decorators = [
   (Story) => (
@@ -24,6 +28,6 @@ export const decorators = [
       <Story />
     </TheMantineProvider>
   ),
-];
+]
 
-export default preview;
+export default preview
