@@ -1,5 +1,5 @@
 import { useUpdatingRef } from ".."
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 export enum TruncateFrom {
   Start = "start",
@@ -16,6 +16,7 @@ export interface UseTruncateOptions {
 
 const calculate = (originalString: string, el: HTMLElement): string => {
   const truncString = originalString
+  console.log(el)
 
   return truncString
 }
@@ -24,6 +25,9 @@ const useAutoTruncateText = (
   originalString: string,
   options?: UseTruncateOptions,
 ) => {
+  // todo: remove this effect - only put here to shut up tslint
+  useEffect(() => {}, [options])
+
   const textRef = useRef<HTMLElement>()
   // Casting props.children to string - risky up as far as early exit
   const [truncatedText, setTruncatedText] = useState<string>(originalString)

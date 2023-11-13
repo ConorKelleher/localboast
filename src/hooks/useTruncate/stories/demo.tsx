@@ -1,4 +1,4 @@
-import useTruncate, { TruncateFrom, UseTruncateOptions } from "."
+import useTruncate, { TruncateFrom, UseTruncateOptions } from ".."
 
 interface UseTruncateDemoProps {
   /**

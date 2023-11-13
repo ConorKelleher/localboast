@@ -1,4 +1,4 @@
-import useUpdatingRef from "."
+import useUpdatingRef from ".."
 import { Text } from "@mantine/core"
 import React, { useEffect, useRef } from "react"
 
