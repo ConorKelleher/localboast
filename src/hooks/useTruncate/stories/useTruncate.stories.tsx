@@ -43,3 +43,28 @@ export const TruncateStart: Story = {
     options: { from: TruncateFrom.Start },
   },
 }
+
+export const TruncateOffsetEnd: Story = {
+  args: {
+    originalString: fullString,
+    options: { from: TruncateFrom.End, endOffset: 4 },
+  },
+}
+export const TruncateMiddleOffsetEnd: Story = {
+  args: {
+    originalString: fullString,
+    options: { from: TruncateFrom.Middle, endOffset: 15 },
+  },
+}
+export const TruncateMiddleOffsetStart: Story = {
+  args: {
+    originalString: fullString,
+    options: { from: TruncateFrom.Middle, startOffset: 15 },
+  },
+}
+export const TruncateOffsetStart: Story = {
+  args: {
+    originalString: fullString,
+    options: { from: TruncateFrom.Start, startOffset: 4 },
+  },
+}

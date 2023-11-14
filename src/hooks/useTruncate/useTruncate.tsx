@@ -13,22 +13,19 @@ export interface UseTruncateOptions {
   startOffset?: number
   endOffset?: number
   disableWarnings?: boolean
+  disableMutation?: boolean
 }
 
 const DEFAULT_FROM = TruncateFrom.Start
 const DEFAULT_START_OFFSET = 0
 const DEFAULT_END_OFFSET = 0
 const DEFAULT_DISABLE_WARNINGS = false
+const DEFAULT_DISABLE_MUTATION = false
 const DEFAULT_ELLIPSIS = "…"
 
-// Thanks https://stackoverflow.com/a/9541579
-const isOverflown = ({
-  clientWidth,
-  clientHeight,
-  scrollWidth,
-  scrollHeight,
-}: HTMLElement) => {
-  return scrollHeight > clientHeight || scrollWidth > clientWidth
+// Inspired by (and with thanks to) https://stackoverflow.com/a/9541579
+const isOverflownHoriz = ({ clientWidth, scrollWidth }: HTMLElement) => {
+  return scrollWidth > clientWidth
 }
 
 const getInitialInsertionIndex = (
@@ -38,7 +35,7 @@ const getInitialInsertionIndex = (
   endOffset: number,
 ) =>
   fromSetting === TruncateFrom.Middle
-    ? Math.floor((originalString.length - startOffset + endOffset) / 2)
+    ? Math.floor(originalString.length / 2) - startOffset + endOffset
     : fromSetting === TruncateFrom.Start
     ? startOffset
     : originalString.length - endOffset
@@ -48,9 +45,12 @@ const calculate = (
   el: HTMLElement,
   options: UseTruncateOptions,
 ): string => {
-  const originalWhitespace = el.style.whiteSpace
-  el.style.whiteSpace = "nowrap"
-  const originalElTextContent = el.textContent
+  const newEl = el.cloneNode() as HTMLElement
+  newEl.style.whiteSpace = "nowrap"
+  newEl.style.opacity = "0"
+  newEl.style.position = "absolute"
+  newEl.style.width = `${el.clientWidth}px`
+  document.body.appendChild(newEl)
   let ellipsisStartIndex = getInitialInsertionIndex(
     originalString,
     options.from!,
@@ -68,41 +68,72 @@ const calculate = (
       firstHalf +
       (ellipsisEndIndex > ellipsisStartIndex ? options.ellipsis : "") +
       lastHalf
+    newEl.textContent = truncatedString
   }
   updateString()
 
   while (
-    isOverflown(el) &&
+    isOverflownHoriz(newEl) &&
     ellipsisStartIndex >= 0 &&
     ellipsisEndIndex <= originalString.length
   ) {
     switch (options.from) {
       case TruncateFrom.Start: {
-        ellipsisEndIndex += 1
-        break
-      }
-      case TruncateFrom.End: {
-        ellipsisStartIndex -= 1
-        break
-      }
-      case TruncateFrom.Middle: {
-        if (firstHalf.length > lastHalf.length) {
+        if (ellipsisEndIndex >= originalString.length) {
           ellipsisStartIndex -= 1
         } else {
           ellipsisEndIndex += 1
         }
         break
       }
+      case TruncateFrom.End: {
+        if (ellipsisStartIndex <= 0) {
+          ellipsisEndIndex += 1
+        } else {
+          ellipsisStartIndex -= 1
+        }
+        break
+      }
+      case TruncateFrom.Middle: {
+        if (
+          firstHalf.length +
+            options.startOffset! -
+            lastHalf.length -
+            options.endOffset! >
+          0
+        ) {
+          // First half bigger than second - remove from start unless already at 0
+          if (ellipsisStartIndex <= 0) {
+            ellipsisEndIndex += 1
+          } else {
+            ellipsisStartIndex -= 1
+          }
+        } else {
+          // First half smaller than second - remove second unless already at end
+          if (ellipsisEndIndex >= originalString.length) {
+            ellipsisStartIndex -= 1
+          } else {
+            ellipsisEndIndex += 1
+          }
+        }
+        break
+      }
     }
     updateString()
+  }
+
+  newEl.remove()
+
+  if (!options.disableMutation) {
+    // In theory this shouldn't be needed. In practice, it basically is.
+    // Without mutation, the hook returns a string which can just be passed to the tag as a child
+    // But react renders are slower than dom manipulation.
+    // Component updates and renders are likely to get outdated when resizing a window or element gradually
+    // Component will think it's done truncating but dom has since updated.
+    // Mutating an externally created ref is shady as hell but it gives best stability
     el.textContent = truncatedString
   }
 
-  el.textContent = originalElTextContent
-  // Might not need this. Seems wrong to imperatively change external element
-  // But any element with this hook shouldn't wrap anyway so...
-  // could maybe remove this and save some dom manipulation
-  el.style.whiteSpace = originalWhitespace
   return truncatedString
 }
 
@@ -121,6 +152,7 @@ const useAutoTruncateText = (
     endOffset = DEFAULT_END_OFFSET,
     disableWarnings = DEFAULT_DISABLE_WARNINGS,
     ellipsis = DEFAULT_ELLIPSIS,
+    disableMutation = DEFAULT_DISABLE_MUTATION,
   } = options || {}
 
   const onNeedRecalculate = useCallback(() => {
@@ -132,6 +164,7 @@ const useAutoTruncateText = (
       startOffset,
       endOffset,
       disableWarnings,
+      disableMutation,
       ellipsis,
     })
     if (truncatedTextRef.current !== newTruncatedText) {
@@ -144,6 +177,7 @@ const useAutoTruncateText = (
     startOffset,
     endOffset,
     disableWarnings,
+    disableMutation,
     truncatedTextRef,
   ])
   const onNeedRecalculateRef = useUpdatingRef(onNeedRecalculate)
