@@ -1,5 +1,5 @@
 import { useUpdatingRef } from ".."
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 export enum TruncateFrom {
   Start = "start",
@@ -186,18 +186,26 @@ const useAutoTruncateText = (
   }, [onNeedRecalculateRef])
   const resizeObserver = useMemo(() => new ResizeObserver(onResize), [onResize])
 
+  const disconnectObserver = useCallback(() => {
+    resizeObserver.disconnect()
+  }, [resizeObserver])
+
+  useEffect(() => {
+    return disconnectObserver
+  }, [disconnectObserver])
+
   const refCallback = useCallback(
     (ref: HTMLElement | null) => {
       if (ref) {
         if (textRef.current) {
-          resizeObserver.disconnect()
+          disconnectObserver()
         }
         textRef.current = ref
         resizeObserver.observe(textRef.current)
         onNeedRecalculate()
       }
     },
-    [onNeedRecalculate, resizeObserver],
+    [onNeedRecalculate, resizeObserver, disconnectObserver],
   )
 
   // Not memoized to avoid needless checks - Expected use involves destructuring (e.g. const [text, ref] = useAutoTruncateText(...))
