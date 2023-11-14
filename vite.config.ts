@@ -8,7 +8,7 @@ import react from "@vitejs/plugin-react"
 export default defineConfig({
   plugins: [react()],
   build: {
-    manifest: true,
+    manifest: false,
     minify: true,
     reportCompressedSize: true,
     lib: {
@@ -38,7 +38,6 @@ export default defineConfig({
             "**/*.stories.ts",
             "**/storybook_utils/**",
             "**/test_utils/**",
-            "**/demo.ts",
           ],
         }),
       ],

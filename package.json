@@ -1,8 +1,15 @@
 {
   "name": "localboast",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "version": "0.0.2",
+  "license": "MIT",
+  "author": "Conor Kelleher - conor95kelleher@hotmail.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/conorkelleher/localboast.git"
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "dev": "vite",
     "tsc": "tsc",
