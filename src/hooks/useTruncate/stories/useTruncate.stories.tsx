@@ -3,7 +3,7 @@ import { UseTruncateDemo, renderDemoArgs } from "./demo"
 import { TruncateFrom } from ".."
 
 const meta = {
-  title: "Hooks/useAutoTruncate",
+  title: "Hooks/useTruncate",
   component: UseTruncateDemo,
   parameters: {
     layout: "centered",
@@ -44,6 +44,12 @@ export const TruncateStart: Story = {
   },
 }
 
+export const TruncateOffsetStart: Story = {
+  args: {
+    originalString: fullString,
+    options: { from: TruncateFrom.Start, startOffset: 4 },
+  },
+}
 export const TruncateOffsetEnd: Story = {
   args: {
     originalString: fullString,
@@ -60,11 +66,5 @@ export const TruncateMiddleOffsetStart: Story = {
   args: {
     originalString: fullString,
     options: { from: TruncateFrom.Middle, startOffset: 15 },
-  },
-}
-export const TruncateOffsetStart: Story = {
-  args: {
-    originalString: fullString,
-    options: { from: TruncateFrom.Start, startOffset: 4 },
   },
 }

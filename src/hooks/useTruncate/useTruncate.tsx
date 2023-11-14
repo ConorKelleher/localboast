@@ -16,12 +16,14 @@ export interface UseTruncateOptions {
   disableMutation?: boolean
 }
 
-const DEFAULT_FROM = TruncateFrom.Start
-const DEFAULT_START_OFFSET = 0
-const DEFAULT_END_OFFSET = 0
-const DEFAULT_DISABLE_WARNINGS = false
-const DEFAULT_DISABLE_MUTATION = false
-const DEFAULT_ELLIPSIS = "…"
+export const DEFAULT_OPTIONS = {
+  from: TruncateFrom.Start,
+  startOffset: 0,
+  endOffset: 0,
+  disableWarnings: false,
+  disableMutation: false,
+  ellipsis: "…",
+}
 
 // Inspired by (and with thanks to) https://stackoverflow.com/a/9541579
 const isOverflownHoriz = ({ clientWidth, scrollWidth }: HTMLElement) => {
@@ -45,11 +47,14 @@ const calculate = (
   el: HTMLElement,
   options: UseTruncateOptions,
 ): string => {
+  const originalElTextContent = el.textContent
+  el.textContent = originalString
   const newEl = el.cloneNode() as HTMLElement
   newEl.style.whiteSpace = "nowrap"
   newEl.style.opacity = "0"
   newEl.style.position = "absolute"
-  newEl.style.width = `${el.clientWidth}px`
+  newEl.style.display = "inline-block"
+  newEl.style.width = `${el.getBoundingClientRect().width}px`
   document.body.appendChild(newEl)
   let ellipsisStartIndex = getInitialInsertionIndex(
     originalString,
@@ -132,6 +137,9 @@ const calculate = (
     // Component will think it's done truncating but dom has since updated.
     // Mutating an externally created ref is shady as hell but it gives best stability
     el.textContent = truncatedString
+  } else {
+    // If no mutation wanted, put it back before we started playing with it
+    el.textContent = originalElTextContent
   }
 
   return truncatedString
@@ -147,12 +155,12 @@ const useAutoTruncateText = (
   const truncatedTextRef = useUpdatingRef(truncatedText)
   // Destructuring to primitives now to save memoization later
   const {
-    from = DEFAULT_FROM,
-    startOffset = DEFAULT_START_OFFSET,
-    endOffset = DEFAULT_END_OFFSET,
-    disableWarnings = DEFAULT_DISABLE_WARNINGS,
-    ellipsis = DEFAULT_ELLIPSIS,
-    disableMutation = DEFAULT_DISABLE_MUTATION,
+    from = DEFAULT_OPTIONS.from,
+    startOffset = DEFAULT_OPTIONS.startOffset,
+    endOffset = DEFAULT_OPTIONS.endOffset,
+    disableWarnings = DEFAULT_OPTIONS.disableWarnings,
+    ellipsis = DEFAULT_OPTIONS.ellipsis,
+    disableMutation = DEFAULT_OPTIONS.disableMutation,
   } = options || {}
 
   const onNeedRecalculate = useCallback(() => {
@@ -182,6 +190,7 @@ const useAutoTruncateText = (
   ])
   const onNeedRecalculateRef = useUpdatingRef(onNeedRecalculate)
   const onResize = useCallback(() => {
+    console.log("resized")
     onNeedRecalculateRef.current()
   }, [onNeedRecalculateRef])
   const resizeObserver = useMemo(() => new ResizeObserver(onResize), [onResize])
@@ -191,8 +200,12 @@ const useAutoTruncateText = (
   }, [resizeObserver])
 
   useEffect(() => {
-    return disconnectObserver
-  }, [disconnectObserver])
+    window.addEventListener("resize", onResize)
+    return () => {
+      disconnectObserver()
+      window.removeEventListener("resize", onResize)
+    }
+  }, [disconnectObserver, onResize])
 
   const refCallback = useCallback(
     (ref: HTMLElement | null) => {

@@ -1,7 +1,5 @@
-import useTruncate, {
-  type UseTruncateOptions,
-  TruncateFrom,
-} from "hooks/useTruncate"
+import { DEFAULT_OPTIONS as DEFAULT_TRUNCATE_OPTIONS } from "../../hooks/useTruncate/useTruncate"
+import useTruncate, { TruncateFrom } from "../../hooks/useTruncate"
 import React from "react"
 
 /**
@@ -11,10 +9,39 @@ import React from "react"
  * - endOffset - How many trailing characters should be allowed after chosen truncation point
  * - disableWarnings - If true, console warnings for non-string children prop will be disabled
  */
-export interface TruncateProps
-  extends React.PropsWithChildren,
-    UseTruncateOptions {
-  tag?: React.ElementType
+export interface TruncateProps {
+  /**
+   * Raw string that is to be truncated. If you want to use a custom component, use the "tag" prop. Don't pass it as a child
+   */
+  children: string
+  /**
+   * Custom component to use for text rendering. Must accept a ref prop
+   */
+  tag?: React.ElementType | string
+  /**
+   * Optional ellipsis character override when performing truncation
+   */
+  ellipsis?: string
+  /**
+   * From where in the string should the truncation begin (start, middle, end)
+   */
+  from?: TruncateFrom
+  /**
+   * How many additional characters should there be to the left of the initial ellipsis insertion point
+   */
+  startOffset?: number
+  /**
+   * How many additional characters should there be to the right of the initial ellipsis insertion point
+   */
+  endOffset?: number
+  /**
+   * By default, the element's component is programmatically assigned to guarantee renders are in sync with DOM changes. If this feels bad, disable it (note - this will likely cause issues with unwanted wrapping)
+   */
+  disableMutation?: boolean
+  /**
+   * Turn off console warnings about passing wrong children type
+   */
+  disableWarnings?: boolean
 }
 
 const Truncate = (props: TruncateProps) => {
@@ -39,9 +66,8 @@ const Truncate = (props: TruncateProps) => {
 }
 
 Truncate.defaultProps = {
-  from: TruncateFrom.End,
-  startOffset: 0,
-  endOffset: 0,
+  ...DEFAULT_TRUNCATE_OPTIONS,
+  children: "",
   tag: "span",
 }
 
