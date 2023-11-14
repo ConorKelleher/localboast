@@ -22,15 +22,24 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof UseTruncateDemo>
 
-export const Primary: Story = {
+const fullString =
+  "This is my full, unadulterated string. This is sadly too long for the container"
+
+export const TruncateEnd: Story = {
   args: {
-    originalString:
-      "This is my full, unadulterated string. This is sadly too long for the container",
-    options: {
-      from: TruncateFrom.End,
-      startOffset: 0,
-      endOffset: 0,
-      disableWarnings: false,
-    },
+    originalString: fullString,
+    options: { from: TruncateFrom.End },
+  },
+}
+export const TruncateMiddle: Story = {
+  args: {
+    originalString: fullString,
+    options: { from: TruncateFrom.Middle },
+  },
+}
+export const TruncateStart: Story = {
+  args: {
+    originalString: fullString,
+    options: { from: TruncateFrom.Start },
   },
 }
