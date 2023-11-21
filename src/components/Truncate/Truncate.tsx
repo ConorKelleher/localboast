@@ -23,6 +23,10 @@ export interface TruncateProps {
    */
   ellipsis?: string
   /**
+   * How many pixels should it over-truncate by. Used to avoid wrapping of slow updates
+   */
+  threshold?: number
+  /**
    * From where in the string should the truncation begin (start, middle, end)
    */
   from?: TruncateFrom

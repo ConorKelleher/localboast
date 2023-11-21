@@ -7,8 +7,32 @@ const meta = {
   component: Truncate,
   parameters: {
     layout: "centered",
-    deepControls: { enabled: true },
+    // deepControls: { enabled: true },
   },
+  argTypes: {
+    tag: {
+      control: {
+        type: "text",
+      },
+    },
+  },
+  decorators: [
+    (Story) => (
+      <div
+        style={{
+          resize: "both",
+          display: "block",
+          border: "solid 1px",
+          borderRadius: 5,
+          overflow: "auto",
+        }}
+      >
+        <div style={{ height: "100%", width: "100%" }}>
+          <Story />
+        </div>
+      </div>
+    ),
+  ],
   tags: ["autodocs"],
 } satisfies Meta<typeof Truncate>
 
@@ -16,7 +40,7 @@ export default meta
 type Story = StoryObj<typeof Truncate>
 
 const fullString =
-  "This is my full, unadulterated string. This is sadly too long for the container"
+  "This is my full, unadulterated string. This is sadly too long for the container. Try resizing the window or expanding the side panel to see this truncation in effect"
 
 export const TruncateEnd: Story = {
   args: {

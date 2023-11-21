@@ -1,5 +1,7 @@
 import { useUpdatingRef } from ".."
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { createDetectElementResize } from "../../helpers/detectElementResize"
+import generateRandomId from "../../helpers/generateRandomId"
 
 export enum TruncateFrom {
   Start = "start",
@@ -14,6 +16,7 @@ export interface UseTruncateOptions {
   endOffset?: number
   disableWarnings?: boolean
   disableMutation?: boolean
+  threshold?: number
 }
 
 export const DEFAULT_OPTIONS = {
@@ -23,6 +26,7 @@ export const DEFAULT_OPTIONS = {
   disableWarnings: false,
   disableMutation: false,
   ellipsis: "…",
+  threshold: 0,
 }
 
 // Inspired by (and with thanks to) https://stackoverflow.com/a/9541579
@@ -48,14 +52,21 @@ const calculate = (
   options: UseTruncateOptions,
 ): string => {
   const originalElTextContent = el.textContent
+  const originalElWordBreak = el.style.wordBreak
+  el.style.wordBreak = "break-all"
   el.textContent = originalString
+  const availableWidth =
+    el.clientWidth || el.getBoundingClientRect().width - options.threshold!
+  el.style.wordBreak = originalElWordBreak
+
   const newEl = el.cloneNode() as HTMLElement
   newEl.style.whiteSpace = "nowrap"
   newEl.style.opacity = "0"
   newEl.style.position = "absolute"
-  newEl.style.display = "inline-block"
-  newEl.style.width = `${el.getBoundingClientRect().width}px`
+  newEl.style.display = "flex"
+  newEl.style.width = `${availableWidth}px`
   document.body.appendChild(newEl)
+
   let ellipsisStartIndex = getInitialInsertionIndex(
     originalString,
     options.from!,
@@ -150,6 +161,7 @@ const useAutoTruncateText = (
   options?: UseTruncateOptions,
 ) => {
   const textRef = useRef<HTMLElement>()
+  const resizeListenedRef = useRef<HTMLElement>()
   // Casting props.children to string - risky up as far as early exit
   const [truncatedText, setTruncatedText] = useState<string>(originalString)
   const truncatedTextRef = useUpdatingRef(truncatedText)
@@ -161,6 +173,7 @@ const useAutoTruncateText = (
     disableWarnings = DEFAULT_OPTIONS.disableWarnings,
     ellipsis = DEFAULT_OPTIONS.ellipsis,
     disableMutation = DEFAULT_OPTIONS.disableMutation,
+    threshold = DEFAULT_OPTIONS.threshold,
   } = options || {}
 
   const onNeedRecalculate = useCallback(() => {
@@ -174,6 +187,7 @@ const useAutoTruncateText = (
       disableWarnings,
       disableMutation,
       ellipsis,
+      threshold,
     })
     if (truncatedTextRef.current !== newTruncatedText) {
       setTruncatedText(newTruncatedText)
@@ -181,6 +195,7 @@ const useAutoTruncateText = (
   }, [
     originalString,
     ellipsis,
+    threshold,
     from,
     startOffset,
     endOffset,
@@ -193,19 +208,20 @@ const useAutoTruncateText = (
     console.log("resized")
     onNeedRecalculateRef.current()
   }, [onNeedRecalculateRef])
-  const resizeObserver = useMemo(() => new ResizeObserver(onResize), [onResize])
-
+  const resizeObserver = useMemo(
+    () => createDetectElementResize(generateRandomId()),
+    [],
+  )
   const disconnectObserver = useCallback(() => {
-    resizeObserver.disconnect()
-  }, [resizeObserver])
-
+    if (textRef.current && resizeObserver) {
+      resizeObserver.removeResizeListener(resizeListenedRef.current!, onResize)
+    }
+  }, [resizeObserver, onResize])
   useEffect(() => {
-    window.addEventListener("resize", onResize)
     return () => {
       disconnectObserver()
-      window.removeEventListener("resize", onResize)
     }
-  }, [disconnectObserver, onResize])
+  }, [resizeObserver, onResize, disconnectObserver])
 
   const refCallback = useCallback(
     (ref: HTMLElement | null) => {
@@ -214,11 +230,12 @@ const useAutoTruncateText = (
           disconnectObserver()
         }
         textRef.current = ref
-        resizeObserver.observe(textRef.current)
+        resizeListenedRef.current = ref.parentElement || document.body
+        resizeObserver.addResizeListener(resizeListenedRef.current, onResize)
         onNeedRecalculate()
       }
     },
-    [onNeedRecalculate, resizeObserver, disconnectObserver],
+    [onNeedRecalculate, resizeObserver, disconnectObserver, onResize],
   )
 
   // Not memoized to avoid needless checks - Expected use involves destructuring (e.g. const [text, ref] = useAutoTruncateText(...))
