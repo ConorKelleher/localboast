@@ -26,7 +26,7 @@ export const DEFAULT_OPTIONS = {
   disableWarnings: false,
   disableMutation: false,
   ellipsis: "…",
-  threshold: 0,
+  threshold: 3,
 }
 
 // Inspired by (and with thanks to) https://stackoverflow.com/a/9541579
@@ -148,6 +148,7 @@ const calculate = (
     // Component will think it's done truncating but dom has since updated.
     // Mutating an externally created ref is shady as hell but it gives best stability
     el.textContent = truncatedString
+    el.style.whiteSpace = "nowrap"
   } else {
     // If no mutation wanted, put it back before we started playing with it
     el.textContent = originalElTextContent
@@ -206,6 +207,7 @@ const useAutoTruncateText = (
   const onNeedRecalculateRef = useUpdatingRef(onNeedRecalculate)
   const onResize = useCallback(() => {
     console.log("resized")
+    debugger
     onNeedRecalculateRef.current()
   }, [onNeedRecalculateRef])
   const resizeObserver = useMemo(

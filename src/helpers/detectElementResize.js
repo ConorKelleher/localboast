@@ -95,16 +95,16 @@ function createDetectElementResize(nonce) {
         expandChild = expand.firstElementChild
       contract.scrollLeft = contract.scrollWidth
       contract.scrollTop = contract.scrollHeight
-      expandChild.style.width = expand.offsetWidth + 1 + "px"
-      expandChild.style.height = expand.offsetHeight + 1 + "px"
+      expandChild.style.width = expand.clientWidth + 1 + "px"
+      expandChild.style.height = expand.clientHeight + 1 + "px"
       expand.scrollLeft = expand.scrollWidth
       expand.scrollTop = expand.scrollHeight
     }
 
     checkTriggers = function (element) {
       return (
-        element.offsetWidth !== element.__resizeLast__.width ||
-        element.offsetHeight !== element.__resizeLast__.height
+        element.clientWidth !== element.__resizeLast__.width ||
+        element.clientHeight !== element.__resizeLast__.height
       )
     }
 
@@ -127,8 +127,8 @@ function createDetectElementResize(nonce) {
       }
       this.__resizeRAF__ = requestFrame(function animationFrame() {
         if (checkTriggers(element)) {
-          element.__resizeLast__.width = element.offsetWidth
-          element.__resizeLast__.height = element.offsetHeight
+          element.__resizeLast__.width = element.clientWidth
+          element.__resizeLast__.height = element.clientHeight
           element.__resizeListeners__.forEach(
             function forEachResizeListener(fn) {
               fn.call(element, e)
@@ -208,7 +208,10 @@ function createDetectElementResize(nonce) {
 
   const addResizeListener = function (element, fn) {
     if (attachEvent) {
-      element.attachEvent("onresize", fn)
+      element.attachEvent("onresize", () => {
+        console.log("in onresize")
+        fn()
+      })
     } else {
       if (!element.__resizeTriggers__) {
         const doc = element.ownerDocument
