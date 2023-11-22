@@ -16,15 +16,17 @@ export interface UseTruncateOptions {
   endOffset?: number
   disableWarnings?: boolean
   disableMutation?: boolean
+  disableNativeTruncate?: boolean
   threshold?: number
 }
 
 export const DEFAULT_OPTIONS = {
-  from: TruncateFrom.Start,
+  from: TruncateFrom.End,
   startOffset: 0,
   endOffset: 0,
   disableWarnings: false,
   disableMutation: false,
+  disableNativeTruncate: false,
   ellipsis: "…",
   threshold: 3,
 }
@@ -174,8 +176,16 @@ const useAutoTruncateText = (
     disableWarnings = DEFAULT_OPTIONS.disableWarnings,
     ellipsis = DEFAULT_OPTIONS.ellipsis,
     disableMutation = DEFAULT_OPTIONS.disableMutation,
+    disableNativeTruncate = DEFAULT_OPTIONS.disableNativeTruncate,
     threshold = DEFAULT_OPTIONS.threshold,
   } = options || {}
+  const shouldUseNativeTruncate =
+    !disableMutation &&
+    !disableNativeTruncate &&
+    ellipsis === DEFAULT_OPTIONS.ellipsis &&
+    from === TruncateFrom.End &&
+    startOffset === 0 &&
+    endOffset === 0
 
   const onNeedRecalculate = useCallback(() => {
     if (!textRef.current) {
@@ -206,8 +216,7 @@ const useAutoTruncateText = (
   ])
   const onNeedRecalculateRef = useUpdatingRef(onNeedRecalculate)
   const onResize = useCallback(() => {
-    console.log("resized")
-    debugger
+    console.log("resizing")
     onNeedRecalculateRef.current()
   }, [onNeedRecalculateRef])
   const resizeObserver = useMemo(
@@ -215,8 +224,8 @@ const useAutoTruncateText = (
     [],
   )
   const disconnectObserver = useCallback(() => {
-    if (textRef.current && resizeObserver) {
-      resizeObserver.removeResizeListener(resizeListenedRef.current!, onResize)
+    if (textRef.current && resizeListenedRef.current && resizeObserver) {
+      resizeObserver.removeResizeListener(resizeListenedRef.current, onResize)
     }
   }, [resizeObserver, onResize])
   useEffect(() => {
@@ -225,19 +234,36 @@ const useAutoTruncateText = (
     }
   }, [resizeObserver, onResize, disconnectObserver])
 
+  const setupTruncate = useCallback(
+    (ref: HTMLElement) => {
+      if (shouldUseNativeTruncate) {
+        ref.style.whiteSpace = "nowrap"
+        ref.style.overflow = "hidden"
+        ref.style.textOverflow = "ellipsis"
+        ref.style.display = "block"
+      } else {
+        resizeListenedRef.current = ref.parentElement || document.body
+        resizeObserver.addResizeListener(resizeListenedRef.current, onResize)
+        onNeedRecalculate()
+      }
+    },
+    [onNeedRecalculate, resizeObserver, onResize, shouldUseNativeTruncate],
+  )
+
   const refCallback = useCallback(
     (ref: HTMLElement | null) => {
       if (ref) {
         if (textRef.current) {
           disconnectObserver()
         }
+        if (resizeListenedRef.current) {
+          resizeListenedRef.current = undefined
+        }
         textRef.current = ref
-        resizeListenedRef.current = ref.parentElement || document.body
-        resizeObserver.addResizeListener(resizeListenedRef.current, onResize)
-        onNeedRecalculate()
+        setupTruncate(ref)
       }
     },
-    [onNeedRecalculate, resizeObserver, disconnectObserver, onResize],
+    [setupTruncate, disconnectObserver],
   )
 
   // Not memoized to avoid needless checks - Expected use involves destructuring (e.g. const [text, ref] = useAutoTruncateText(...))

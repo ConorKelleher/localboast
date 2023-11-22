@@ -8,6 +8,15 @@ const meta = {
   parameters: {
     layout: "centered",
     // deepControls: { enabled: true },
+    docs: {
+      description: {
+        component: `
+Component to allow any rendered string to be programmatically truncated with customizable truncation position, offsets and ellipsis.<br>
+This wraps the <strong>useTruncate</strong> component to allow ease-of use with JSX.
+            
+See the hook-based solution at <strong>[useTruncate](/docs/hooks-useTruncate--docs)</strong>.`,
+      },
+    },
   },
   argTypes: {
     tag: {
@@ -25,6 +34,7 @@ const meta = {
           border: "solid 1px",
           borderRadius: 5,
           overflow: "auto",
+          width: 500,
         }}
       >
         <div style={{ height: "100%", width: "100%" }}>
@@ -45,7 +55,6 @@ const fullString =
 export const TruncateEnd: Story = {
   args: {
     children: fullString,
-    from: TruncateFrom.End,
   },
 }
 export const TruncateMiddle: Story = {
@@ -71,7 +80,6 @@ export const TruncateOffsetStart: Story = {
 export const TruncateOffsetEnd: Story = {
   args: {
     children: fullString,
-    from: TruncateFrom.End,
     endOffset: 4,
   },
 }

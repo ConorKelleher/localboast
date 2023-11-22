@@ -39,6 +39,11 @@ export interface TruncateProps {
    */
   endOffset?: number
   /**
+   * Disables the default optimization that happens when using default options. Anything other than right-based, no offset truncation is more intensive than native css-based truncation, so we try to use the built-in solution where possible.
+   * If that native truncation is causing problems for you, disable it here to allow the truncation to always use the more costly observer-based JS solution for truncation
+   */
+  disableNativeTruncate?: boolean
+  /**
    * By default, the element's component is programmatically assigned to guarantee renders are in sync with DOM changes. If this feels bad, disable it (note - this will likely cause issues with unwanted wrapping)
    */
   disableMutation?: boolean

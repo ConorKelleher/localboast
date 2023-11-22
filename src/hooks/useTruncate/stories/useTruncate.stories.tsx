@@ -13,6 +13,13 @@ const meta = {
           return renderDemoArgs(context.allArgs)
         },
       },
+      description: {
+        component: `
+Hook to allow any string rendered in the DOM to be programmatically truncated  with customizable truncation position, offsets and ellipsis.<br>
+In most cases, the component-based solution (which simply wraps a call to this hook) is probably preferred.
+            
+See full documentation of the options at the [Truncate](/docs/components-truncate--docs) component.`,
+      },
     },
     deepControls: { enabled: true },
   },
