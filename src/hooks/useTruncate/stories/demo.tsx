@@ -39,13 +39,15 @@ export const UseTruncateDemo = ({
 }
 
 export const renderDemoArgs = (args: UseTruncateDemoProps) => {
+  const optionsString = args.options
+    ? JSON.stringify(args.options, null, 2).replace(/\n/g, "\n    ")
+    : ""
   return `
 const SomeComponent = () => {
-  const [text, ref] = useTruncate("${args.originalString}", ${JSON.stringify(
-    args.options,
-    null,
-    2,
-  )})
+  const [text, ref] = useTruncate(${optionsString ? "\n    " : ""}"${
+    args.originalString
+  }"${optionsString ? "," : ")"}
+    ${optionsString}${optionsString ? "\n  )" : ""}
   return <div ref={ref}>{text}</div>
 }
 `

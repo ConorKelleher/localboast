@@ -35,7 +35,6 @@ const fullString =
 export const TruncateEnd: Story = {
   args: {
     originalString: fullString,
-    options: { from: TruncateFrom.End },
   },
 }
 export const TruncateMiddle: Story = {
