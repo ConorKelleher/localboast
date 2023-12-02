@@ -1,4 +1,4 @@
-import type { Meta, StoryContext, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/react"
 import { UseMoveDemo, renderDemoArgs } from "./UseMoveDemo"
 
 const meta = {
@@ -8,8 +8,8 @@ const meta = {
     layout: "centered",
     docs: {
       source: {
-        transform: (_: string, context: StoryContext) => {
-          return renderDemoArgs(context.allArgs)
+        transform: () => {
+          return renderDemoArgs()
         },
       },
       description: {
