@@ -3,10 +3,11 @@ import typescript from "@rollup/plugin-typescript"
 import path from "path"
 import { typescriptPaths } from "rollup-plugin-typescript-paths"
 import react from "@vitejs/plugin-react"
+import tsconfigPaths from "vite-tsconfig-paths"
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tsconfigPaths()],
   build: {
     manifest: false,
     minify: true,

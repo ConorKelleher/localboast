@@ -1,7 +1,7 @@
 import { useUpdatingRef } from ".."
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { createDetectElementResize } from "../../helpers/detectElementResize"
-import generateRandomId from "../../helpers/generateRandomId"
+import { createDetectElementResize } from "helpers/detectElementResize"
+import generateRandomId from "helpers/generateRandomId"
 
 export enum TruncateFrom {
   Start = "start",

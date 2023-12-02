@@ -1,8 +1,9 @@
-// import type { StorybookConfig } from "@storybook/react-vite";
 const process = require("process")
-const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin")
+const viteTsconfig = require("vite-tsconfig-paths")
+const tsconfigPaths = viteTsconfig.default
 
-// const config: StorybookConfig = {
+const { mergeConfig } = require("vite")
+
 const config = {
   stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
   addons: [
@@ -18,14 +19,6 @@ const config = {
   },
   docs: {
     autodocs: "tag",
-  },
-  webpackFinal: async (config) => {
-    config.resolve.modules = [
-      ...(config.resolve.modules || []),
-      path.resolve(__dirname, "../src"),
-    ]
-
-    return config
   },
 }
 export default config

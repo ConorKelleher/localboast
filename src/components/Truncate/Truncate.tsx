@@ -1,5 +1,5 @@
-import { DEFAULT_OPTIONS as DEFAULT_TRUNCATE_OPTIONS } from "../../hooks/useTruncate/useTruncate"
-import useTruncate, { TruncateFrom } from "../../hooks/useTruncate"
+import { DEFAULT_OPTIONS as DEFAULT_TRUNCATE_OPTIONS } from "hooks/useTruncate/useTruncate"
+import useTruncate, { TruncateFrom } from "hooks/useTruncate"
 import React from "react"
 
 /**

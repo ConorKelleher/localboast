@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import Truncate from ".."
-import { TruncateFrom } from "../../../hooks/useTruncate"
+import { TruncateFrom } from "hooks/useTruncate"
 
 const meta = {
   title: "Components/Truncate",

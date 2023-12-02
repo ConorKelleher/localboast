@@ -1,7 +1,5 @@
 import type { Meta, StoryContext, StoryObj } from "@storybook/react"
-import { DocsContainer } from "@storybook/addon-docs"
 import { UseUpdatingRefDemo, renderDemoArgs } from "./UseUpdatingRefDemo"
-import React from "react"
 
 const meta = {
   title: "Hooks/useUpdatingRef",
