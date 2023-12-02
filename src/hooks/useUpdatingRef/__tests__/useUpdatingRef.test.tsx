@@ -3,7 +3,7 @@ import { screen } from "@testing-library/react"
 import "@testing-library/jest-dom"
 import "test_utils/polyfils"
 import mantineRender from "test_utils/mantineRender"
-import { UseUpdatingRefDemo } from "../stories/demo"
+import { UseUpdatingRefDemo } from "../stories/UseUpdatingRefDemo"
 
 describe("useUpdatingRef Tests", () => {
   let rerender

@@ -1,5 +1,5 @@
 import type { Meta, StoryContext, StoryObj } from "@storybook/react"
-import { UseTruncateDemo, renderDemoArgs } from "./demo"
+import { UseTruncateDemo, renderDemoArgs } from "./UseTruncateDemo"
 import { TruncateFrom } from ".."
 
 const meta = {
