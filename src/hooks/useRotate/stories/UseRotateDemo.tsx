@@ -1,16 +1,14 @@
 import useRotate from ".."
 
 export const UseRotateDemo = () => {
-  const [setHandle, offset] = useRotate()
+  const [setHandle, rotation] = useRotate()
   return (
     <p style={{ textAlign: "center" }}>
       This is a{" "}
       <strong
         ref={(ref) => ref && setHandle(ref)}
         style={{
-          transform: `translate(${offset.x}px, ${offset.y}px)`,
-          userSelect: "none",
-          cursor: "rotate",
+          transform: `rotate(${rotation}deg)`,
           display: "inline-block",
         }}
       >
@@ -19,7 +17,8 @@ export const UseRotateDemo = () => {
       sentence.
       <br />
       <br />
-      Don't try to make it less so by grabbing my emboldened word or anything.
+      Don't try to make it less so by dragging the edges of my emboldened word
+      or anything.
     </p>
   )
 }

@@ -1,81 +1,149 @@
+import svgToDataUri from "helpers/svgToDataUri"
 import { useUpdatingRef } from "hooks"
+import useMove from "hooks/useMove"
 import { useCallback, useEffect, useRef, useState } from "react"
+import RotateIcon from "icons/Rotate.svg?raw"
 
 type Coordinates = { x: number; y: number }
 
+interface UseRotateOptions {
+  handleVisible?: boolean
+  outerSelectionRadius?: number
+}
+
+export const DEFAULT_OPTIONS = {
+  handleVisible: true,
+  outerSelectionRadius: 15,
+}
+
 const NO_OFFSET: Coordinates = { x: 0, y: 0 }
+// https://stackoverflow.com/a/15994225
+const RAD_TO_DEG = 180 / Math.PI
+const getAngleFromOffset = (offset: Coordinates) =>
+  Math.atan2(offset.y, offset.x) * RAD_TO_DEG
 
-const useMove = () => {
-  const handleRef = useRef<HTMLElement | null>(null)
-  const startCoordinatesRef = useRef<Coordinates | null>(null)
-  const [offset, setOffset] = useState<Coordinates>(NO_OFFSET)
-  const offsetRef = useUpdatingRef(offset)
-  // When we've moved the element, track how much we've offset it, so next time (even if it's moved on the page), we have a record of how much initial offset is required
-  const persistedOffsetRef = useRef<Coordinates>(offset)
-  const movingRef = useRef(false)
-
-  const onMouseDown = useCallback(
-    ({ x, y }: Coordinates) => {
-      movingRef.current = true
-
-      startCoordinatesRef.current = {
-        x: x - persistedOffsetRef.current.x,
-        y: y - persistedOffsetRef.current.y,
-      }
-    },
-    [movingRef],
-  )
-  const onMouseUp = useCallback(() => {
-    if (movingRef.current) {
-      movingRef.current = false
-      persistedOffsetRef.current = offsetRef.current
+const useRotate = (options?: UseRotateOptions) => {
+  const mergedOptions = {
+    ...DEFAULT_OPTIONS,
+    ...options,
+  }
+  const optionsRef = useUpdatingRef(mergedOptions)
+  const objectCenterCoordsRef = useRef(NO_OFFSET)
+  const initialVectorAngleRef = useRef(0)
+  const [rotation, setRotation] = useState(0)
+  const rotationRef = useUpdatingRef(rotation)
+  const persistedRotationRef = useRef(rotation)
+  console.log(persistedRotationRef.current)
+  const onGrabHandle = useCallback((e: MouseEvent) => {
+    if (!handleRef.current) {
+      return
     }
-  }, [movingRef, offsetRef])
-  const onMouseMove = useCallback(
-    ({ x, y }: Coordinates) => {
-      if (movingRef.current && startCoordinatesRef.current) {
-        setOffset({
-          x: x - startCoordinatesRef.current.x,
-          y: y - startCoordinatesRef.current.y,
-        })
-      }
-    },
-    [movingRef],
-  )
+    const handleBounds = handleRef.current.getBoundingClientRect()
+    objectCenterCoordsRef.current = {
+      x: handleBounds.x + handleBounds.width / 2,
+      y: handleBounds.y + handleBounds.height / 2,
+    }
+    initialVectorAngleRef.current = getAngleFromOffset({
+      x: e.x - objectCenterCoordsRef.current.x,
+      y: e.y - objectCenterCoordsRef.current.y,
+    })
+  }, [])
+  const onMoveHandle = useCallback((e: MouseEvent) => {
+    setRotation(
+      (getAngleFromOffset({
+        x: e.x - objectCenterCoordsRef.current.x,
+        y: e.y - objectCenterCoordsRef.current.y,
+      }) -
+        initialVectorAngleRef.current +
+        persistedRotationRef.current) %
+        360,
+    )
+  }, [])
+  const onReleaseHandle = useCallback(() => {
+    persistedRotationRef.current = rotationRef.current
+  }, [rotationRef])
+
+  const [setUseMoveHandle] = useMove({
+    noPersistence: true,
+    onMoveStart: onGrabHandle,
+    onMove: onMoveHandle,
+    onMoveEnd: onReleaseHandle,
+  })
+  const rotatableRef = useRef<HTMLElement | null>(null)
+  const handleRef = useRef<HTMLElement | null>(null)
 
   const cleanUp = useCallback(() => {
-    if (handleRef.current) {
-      handleRef.current.removeEventListener("mousedown", onMouseDown)
-      handleRef.current = null
+    persistedRotationRef.current = 0
+  }, [])
+
+  // If visibility setting changes while we have a handle, toggle it
+  useEffect(() => {
+    if (options?.handleVisible !== undefined && handleRef.current) {
+      handleRef.current.style.visibility = options.handleVisible
+        ? "visible"
+        : "hidden"
     }
-    document.removeEventListener("mouseup", onMouseUp)
-    document.removeEventListener("mousemove", onMouseMove)
+  }, [options?.handleVisible])
 
-    setOffset(NO_OFFSET)
-    persistedOffsetRef.current = NO_OFFSET
-  }, [onMouseDown, onMouseMove, onMouseUp])
-
-  const setHandle = useCallback(
+  const setRotatable = useCallback(
     (ref: HTMLElement) => {
-      if (handleRef.current) {
-        if (handleRef.current === ref) {
+      if (rotatableRef.current) {
+        if (rotatableRef.current === ref) {
           return
         }
         cleanUp()
       }
-      handleRef.current = ref
-      handleRef.current.addEventListener("mousedown", onMouseDown)
+      rotatableRef.current = ref
+
+      handleRef.current = document.createElement("div")
+      rotatableRef.current.appendChild(handleRef.current)
+      handleRef.current.style.position = "absolute"
+      handleRef.current.style.zIndex = "99999"
+      const { outerSelectionRadius = DEFAULT_OPTIONS.outerSelectionRadius } =
+        optionsRef.current
+      handleRef.current.style.inset = `-${outerSelectionRadius}px`
+      handleRef.current.style.pointerEvents = "none"
+      handleRef.current.style.borderRadius = `${outerSelectionRadius}px`
+      handleRef.current.style.overflow = "hidden"
+      const topPadding = document.createElement("div")
+      const bottomPadding = document.createElement("div")
+      const leftPadding = document.createElement("div")
+      const rightPadding = document.createElement("div")
+      handleRef.current.appendChild(topPadding)
+      handleRef.current.appendChild(bottomPadding)
+      handleRef.current.appendChild(leftPadding)
+      handleRef.current.appendChild(rightPadding)
+      ;(handleRef.current.style.cursor = svgToDataUri(RotateIcon)),
+        (topPadding.style.position = "absolute")
+      topPadding.style.top = "0"
+      topPadding.style.left = "0"
+      topPadding.style.right = "0"
+      topPadding.style.height = `${outerSelectionRadius}px`
+      topPadding.style.pointerEvents = "all"
+      bottomPadding.style.position = "absolute"
+      bottomPadding.style.bottom = "0"
+      bottomPadding.style.left = "0"
+      bottomPadding.style.right = "0"
+      bottomPadding.style.height = `${outerSelectionRadius}px`
+      bottomPadding.style.pointerEvents = "all"
+      leftPadding.style.position = "absolute"
+      leftPadding.style.top = "0"
+      leftPadding.style.left = "0"
+      leftPadding.style.bottom = "0"
+      leftPadding.style.width = `${outerSelectionRadius}px`
+      leftPadding.style.pointerEvents = "all"
+      rightPadding.style.position = "absolute"
+      rightPadding.style.top = "0"
+      rightPadding.style.bottom = "0"
+      rightPadding.style.right = "0"
+      rightPadding.style.width = `${outerSelectionRadius}px`
+      rightPadding.style.pointerEvents = "all"
+      setUseMoveHandle(handleRef.current)
     },
-    [cleanUp, onMouseDown],
+    [cleanUp, setUseMoveHandle, optionsRef],
   )
 
-  useEffect(() => {
-    document.addEventListener("mouseup", onMouseUp)
-    document.addEventListener("mousemove", onMouseMove)
-    return cleanUp
-  }, [cleanUp, onMouseMove, onMouseUp])
-
-  return [setHandle, offset] as const
+  return [setRotatable, rotation] as const
 }
 
-export default useMove
+export default useRotate

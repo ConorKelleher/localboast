@@ -163,6 +163,10 @@ const useAutoTruncateText = (
   originalString: string,
   options?: UseTruncateOptions,
 ) => {
+  const mergedOptions = {
+    ...DEFAULT_OPTIONS,
+    ...options,
+  }
   const textRef = useRef<HTMLElement>()
   const resizeListenedRef = useRef<HTMLElement>()
   // Casting props.children to string - risky up as far as early exit
@@ -170,15 +174,15 @@ const useAutoTruncateText = (
   const truncatedTextRef = useUpdatingRef(truncatedText)
   // Destructuring to primitives now to save memoization later
   const {
-    from = DEFAULT_OPTIONS.from,
-    startOffset = DEFAULT_OPTIONS.startOffset,
-    endOffset = DEFAULT_OPTIONS.endOffset,
-    disableWarnings = DEFAULT_OPTIONS.disableWarnings,
-    ellipsis = DEFAULT_OPTIONS.ellipsis,
-    disableMutation = DEFAULT_OPTIONS.disableMutation,
-    disableNativeTruncate = DEFAULT_OPTIONS.disableNativeTruncate,
-    threshold = DEFAULT_OPTIONS.threshold,
-  } = options || {}
+    from,
+    startOffset,
+    endOffset,
+    disableWarnings,
+    ellipsis,
+    disableMutation,
+    disableNativeTruncate,
+    threshold,
+  } = mergedOptions
   const shouldUseNativeTruncate =
     !disableMutation &&
     !disableNativeTruncate &&
