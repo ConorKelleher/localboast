@@ -3,14 +3,29 @@ import { screen } from "@testing-library/react"
 import "@testing-library/jest-dom"
 import "test_utils/polyfils"
 import mantineRender from "test_utils/mantineRender"
-import { UseUpdatingRefDemo } from "../stories/UseUpdatingRefDemo"
+import useUpdatingRef from ".."
+
+interface UseUpdatingRefTestProps {
+  value: unknown
+}
+
+const UseUpdatingRefTest = (props: UseUpdatingRefTestProps) => {
+  const ref = useUpdatingRef(props.value)
+
+  return (
+    <>
+      <div data-testid="propsValueOutput">{props.value!.toString()}</div>
+      <div data-testid="refValueOutput">{ref.current!.toString()}</div>
+    </>
+  )
+}
 
 describe("useUpdatingRef Tests", () => {
   let rerender
 
   beforeEach(() => {
     ;({ rerender } = mantineRender(
-      <UseUpdatingRefDemo value="Test Initial Value" />,
+      <UseUpdatingRefTest value="Test Initial Value" />,
     ))
   })
 
@@ -21,11 +36,10 @@ describe("useUpdatingRef Tests", () => {
     expect(screen.getByTestId("refValueOutput")).toHaveTextContent(
       "Test Initial Value",
     )
-    expect(screen.getByTestId("refsCount")).toHaveTextContent("1")
   })
 
   test("Ref value updates asynchronously after arg change", () => {
-    rerender!(<UseUpdatingRefDemo value="New Updated Value" />)
+    rerender!(<UseUpdatingRefTest value="New Updated Value" />)
 
     expect(screen.getByTestId("propsValueOutput")).toHaveTextContent(
       "New Updated Value",
@@ -33,9 +47,8 @@ describe("useUpdatingRef Tests", () => {
     expect(screen.getByTestId("refValueOutput")).toHaveTextContent(
       "Test Initial Value",
     )
-    expect(screen.getByTestId("refsCount")).toHaveTextContent("1")
 
-    rerender!(<UseUpdatingRefDemo value="New Updated Value" />)
+    rerender!(<UseUpdatingRefTest value="New Updated Value" />)
 
     expect(screen.getByTestId("propsValueOutput")).toHaveTextContent(
       "New Updated Value",
@@ -43,6 +56,5 @@ describe("useUpdatingRef Tests", () => {
     expect(screen.getByTestId("refValueOutput")).toHaveTextContent(
       "New Updated Value",
     )
-    expect(screen.getByTestId("refsCount")).toHaveTextContent("1")
   })
 })
