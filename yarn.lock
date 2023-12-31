@@ -9354,6 +9354,7 @@ __metadata:
     prettier: "npm:^3.0.3"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
+    rollup-plugin-exclude-dependencies-from-bundle: "npm:^1.1.23"
     rollup-plugin-typescript-paths: "npm:^1.4.0"
     sass: "npm:^1.69.5"
     storybook: "npm:^7.5.1"
@@ -11293,6 +11294,15 @@ __metadata:
   bin:
     rimraf: ./bin.js
   checksum: f1e646f8c567795f2916aef7aadf685b543da6b9a53e482bb04b07472c7eef2b476045ba1e29f401c301c66b630b22b815ab31fdd60c5e1ae6566ff523debf45
+  languageName: node
+  linkType: hard
+
+"rollup-plugin-exclude-dependencies-from-bundle@npm:^1.1.23":
+  version: 1.1.23
+  resolution: "rollup-plugin-exclude-dependencies-from-bundle@npm:1.1.23"
+  peerDependencies:
+    rollup: "*"
+  checksum: 697af1e06c572b594bdd4a058763c82001d2af4a873c1a1c472b89f30c73838de9f5eb358e773440ede5d6ca1396c7572a534c49f3c39436f66426e5a31f26fa
   languageName: node
   linkType: hard
 

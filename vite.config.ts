@@ -2,6 +2,7 @@ import { defineConfig } from "vite"
 import typescript from "@rollup/plugin-typescript"
 import path from "path"
 import { typescriptPaths } from "rollup-plugin-typescript-paths"
+import excludeDependenciesFromBundle from "rollup-plugin-exclude-dependencies-from-bundle"
 import react from "@vitejs/plugin-react"
 import tsconfigPaths from "vite-tsconfig-paths"
 import svgr from "vite-plugin-svgr"
@@ -30,6 +31,7 @@ export default defineConfig({
         sourcemap: true,
       },
       plugins: [
+        excludeDependenciesFromBundle(),
         typescriptPaths({
           preserveExtensions: true,
         }),

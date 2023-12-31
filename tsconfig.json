@@ -22,7 +22,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
-    "types": ["vite/client", "vitest/globals", "vite-tsconfig-paths"]
+    "types": ["vite/client", "vite-tsconfig-paths"]
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
