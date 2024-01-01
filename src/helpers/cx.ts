@@ -1,5 +1,5 @@
 type CSArg = string | { [key: string]: boolean }
-const cx = (args: CSArg[]) => {
+const cx = (...args: CSArg[]) => {
   const classes: string[] = []
   args.forEach((arg) => {
     if (typeof arg === "string") {
