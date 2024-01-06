@@ -1,5 +1,7 @@
 # LocalBoast - Make your React App a bit more extra.
 
+![BannerImage](assets/icons/ColourSolidWide.jpeg)
+
 This is the full LocalBoast React library.
 
 - GitHub: https://github.com/ConorKelleher/LocalBoast
